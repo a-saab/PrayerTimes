@@ -28,9 +28,6 @@ A lightweight Arduino library for calculating Islamic prayer times based on mult
    - Linux: `~/Arduino/libraries`
 3. Restart the Arduino IDE.
 
-
-```
-
 ## Available Calculation Methods
 
 | Method                                    | Fajr Angle | Isha Angle / Interval | Asr Calculation    | Used In |

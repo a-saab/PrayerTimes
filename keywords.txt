@@ -1,0 +1,30 @@
+#######################################
+# Syntax Coloring Map For PrayerTimesLib
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+PrayerTimes	KEYWORD1	PrayerTimes
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+setAdjustments	KEYWORD2
+setCalculationMethod	KEYWORD2
+calculate	KEYWORD2
+formatTime	KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+MWL	LITERAL1
+ISNA	LITERAL1
+UmmAlQura	LITERAL1
+Egyptian	LITERAL1
+Karachi	LITERAL1
+Tehran	LITERAL1
+Jafari	LITERAL1
