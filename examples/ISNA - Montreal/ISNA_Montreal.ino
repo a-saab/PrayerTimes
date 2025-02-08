@@ -11,13 +11,13 @@ PrayerTimes pt(45.5017, -73.5673, -5);  // Montreal settings
 
 void setup() {
   Serial.begin(9600);
-  // Set manual adjustment offsets (if needed)
+  
+  // Set manual adjustment offsets
   pt.setAdjustments(-1, 0, 14, 0, -1, 0);
-  
-  // Choose a calculation method:
-  // For example, to use Umm al-Qura:
-  pt.setCalculationMethod(UmmAlQura);
-  
+
+  // Using ISNA for correct Fajr/Isha angles (15°)
+  pt.setCalculationMethod(ISNA);
+
   if (!rtc.begin()) {
     Serial.println("RTC NOT Found!");
     while (1);
@@ -44,6 +44,6 @@ void loop() {
   Serial.print("Asr: "); Serial.println(PrayerTimes::formatTime(asrH, asrM));
   Serial.print("Maghrib: "); Serial.println(PrayerTimes::formatTime(maghribH, maghribM));
   Serial.print("Isha: "); Serial.println(PrayerTimes::formatTime(ishaH, ishaM));
-  
+
   delay(10000);
 }
