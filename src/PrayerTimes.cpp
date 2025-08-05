@@ -1,20 +1,21 @@
-// Adnan Saab 
-// Github: a-saab
-// February 07 2025
+/*
+ * File:     PrayerTimes.cpp
+ * Original  Author:  Adnan Saab 
+ * Modified by :   Muzammil Patel (zamilpatel329@gmail.com)
+ * Created:  2025-08-05
+ * Version:  1.0
+ * 
+ */
 
 #include "PrayerTimes.h"
 #include <math.h>
 
-// Constructor
-PrayerTimes::PrayerTimes(float latitude, float longitude, int timeZone)
+PrayerTimes::PrayerTimes(float latitude, float longitude, float timeZone)
     : _latitude(latitude), _longitude(longitude), _timeZone(timeZone),
       _adjFajr(0), _adjSunrise(0), _adjDhuhr(0), _adjAsr(0), _adjMaghrib(0), _adjIsha(0),
-      _fajrAngle(18), _ishaAngle(17), _asrFactor(1.0), _ishaIsInterval(false), _ishaInterval(0)
-{
-    // Default to MWL settings.
-}
+      _fajrAngle(18.0), _ishaAngle(17.0), _asrFactor(1.0), _ishaIsInterval(false),
+      _ishaInterval(0), _dst(false) {}
 
-// Set manual adjustments
 void PrayerTimes::setAdjustments(int adjFajr, int adjSunrise, int adjDhuhr, int adjAsr, int adjMaghrib, int adjIsha) {
     _adjFajr    = adjFajr;
     _adjSunrise = adjSunrise;
@@ -24,205 +25,220 @@ void PrayerTimes::setAdjustments(int adjFajr, int adjSunrise, int adjDhuhr, int 
     _adjIsha    = adjIsha;
 }
 
-// Set the calculation method.
 void PrayerTimes::setCalculationMethod(CalculationMethod method) {
     switch (method) {
-      case MWL:
-        _fajrAngle    = 18.0;
-        _ishaAngle    = 17.0;
-        _asrFactor    = 1.0;
+        case MWL: //Muslim World League
+            _fajrAngle = 18;
+            _ishaAngle = 17;
+            _ishaIsInterval = false;
+            break;
+        case ISNA: //Islamic Society of North America (ISNA)
+            _fajrAngle = 15;
+            _ishaAngle = 15;
+            _ishaIsInterval = false;
+            break;
+        case UmmAlQura: //Umm Al-Qura University, Makkah
+            _fajrAngle = 18.5;
+            _ishaInterval = 90;
+            _ishaIsInterval = true;
+            break;
+        case Egyptian: //Egyptian General Authority of Survey
+            _fajrAngle = 19.5;
+            _ishaAngle = 17.5;
+            _ishaIsInterval = false;
+            break;
+        case Karachi: //University of Islamic Sciences, Karachi 
+        _fajrAngle = 18;
+        _ishaAngle = 18;
         _ishaIsInterval = false;
         break;
-      case ISNA:
-        _fajrAngle    = 15.0;
-        _ishaAngle    = 15.0;
-        _asrFactor    = 1.0;
+        case Tehran: //Institute of Geophysics, University of Tehran 
+        _fajrAngle = 17.7;
+        _ishaAngle = 14;
         _ishaIsInterval = false;
         break;
-      case UmmAlQura:
-        _fajrAngle    = 18.5;
-        // For Umm al-Qura, Isha is a fixed interval (e.g., 90 minutes after Maghrib)
-        _ishaIsInterval = true;
+        case Jafari: //Shia Ithna-Ashari, Leva Institute, Qum 
+        _fajrAngle = 16;
+        _ishaAngle = 14;
+        _ishaIsInterval = false;
+        break;
+        case Gulf: // Gulf Region 
+        _fajrAngle = 19.5;
         _ishaInterval = 90;
-        _asrFactor    = 1.0;
+        _ishaIsInterval = true;
         break;
-      case Egyptian:
-        _fajrAngle    = 19.5;
-        _ishaAngle    = 17.5;
-        _asrFactor    = 1.0;
+        case Kuwait: // Kuwait 
+        _fajrAngle = 18;
+        _ishaAngle = 17.5;
         _ishaIsInterval = false;
         break;
-      case Karachi:
-        _fajrAngle    = 18.0;
-        _ishaAngle    = 18.0;
-        _asrFactor    = 2.0;  // Hanafi method
+        case Qatar: // Qatar 
+        _fajrAngle = 18;
+        _ishaInterval = 90;
+        _ishaIsInterval = true;
+        break;
+        case Singapore: // Majlis Ugama Islam Singapura, Singapore 
+        _fajrAngle = 20;
+        _ishaAngle = 18;
         _ishaIsInterval = false;
         break;
-      case Tehran:
-        _fajrAngle    = 17.7;
-        _ishaAngle    = 14.0;
-        _asrFactor    = 1.0;
+        case France: // Union Organization Islamic de France 
+        _fajrAngle = 20;
+        _ishaAngle = 18;
         _ishaIsInterval = false;
         break;
-      case Jafari:
-        _fajrAngle    = 16.0;
-        _ishaAngle    = 14.0;
-        _asrFactor    = 1.0;
+        case Turkey: // Diyanet İşleri Başkanlığı, Turkey (experimental) 
+        _fajrAngle = 18;
+        _ishaAngle = 17;
         _ishaIsInterval = false;
         break;
-      default:
-        // Default to MWL if something goes wrong.
-        _fajrAngle    = 18.0;
-        _ishaAngle    = 17.0;
-        _asrFactor    = 1.0;
+        case Russia: // Spiritual Administration of Muslims of Russia 
+        _fajrAngle = 16;
+        _ishaAngle = 15;
+        _ishaIsInterval = false;
+        break;
+        case Dubai: // Dubai (experimental) 
+        _fajrAngle = 18.2;
+        _ishaAngle = 18.2;
+        _ishaIsInterval = false;
+        break;
+        case JAKIM: // Jabatan Kemajuan Islam Malaysia (JAKIM) 
+        _fajrAngle = 20;
+        _ishaAngle = 18;
+        _ishaIsInterval = false;
+        break;
+        case Tunisia: // Tunisia
+        _fajrAngle = 18;
+        _ishaAngle = 18;
+        _ishaIsInterval = false;
+        break;
+        case Algeria: // Algeria
+        _fajrAngle = 18;
+        _ishaAngle = 17;
+        _ishaIsInterval = false;
+        break;
+        case Indonesia: // Kementerian Agama Republik Indonesia
+        _fajrAngle = 20;
+        _ishaAngle = 18;
+        _ishaIsInterval = false;
+        break;
+        case Morocco: // Morocco
+        _fajrAngle = 19;
+        _ishaAngle = 17;
+        _ishaIsInterval = false;
+        break;
+        case Portugal: // Comunidade Islamica de Lisboa
+        _fajrAngle = 18;
+        _ishaInterval = 77;
+        _ishaIsInterval = true;
+        break;
+        case Jordan: // Ministry of Awqaf, Islamic Affairs and Holy Places, Jordan
+        _fajrAngle = 18;
+        _ishaAngle = 18;
         _ishaIsInterval = false;
         break;
     }
 }
 
-// Convert degrees to radians.
-float PrayerTimes::deg2rad(float degrees) {
-    return degrees * (PI / 180);
+void PrayerTimes::setAsrMethod(AsrMethod method) {
+    _asrFactor = (method == Hanafi) ? 2.0 : 1.0;
 }
 
-// Convert radians to degrees.
-float PrayerTimes::rad2deg(float radians) {
-    return radians * (180 / PI);
+void PrayerTimes::setDST(bool dstOn) {
+    _dst = dstOn;
 }
 
-// Format the time into a 12-hour clock string.
-String PrayerTimes::formatTime(int hour, int minute) {
-    int hour12;
-    String period;
-    if (hour == 0) {
-        hour12 = 12;
-        period = "AM";
-    } else if (hour < 12) {
-        hour12 = hour;
-        period = "AM";
-    } else if (hour == 12) {
-        hour12 = 12;
-        period = "PM";
-    } else {
-        hour12 = hour - 12;
-        period = "PM";
-    }
-    char buffer[10];
-    sprintf(buffer, "%d:%02d %s", hour12, minute, period.c_str());
-    return String(buffer);
+float PrayerTimes::deg2rad(float degrees) { 
+    return degrees * (PI / 180); 
 }
 
-// Calculate solar parameters based on the day of the year.
+float PrayerTimes::rad2deg(float radians) { 
+    return radians * (180 / PI); 
+}
+
+int PrayerTimes::calculateDayOfYear(int day, int month, int year) {
+    int daysInMonth[] = {31,28,31,30,31,30,31,31,30,31,30,31};
+    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) daysInMonth[1] = 29;
+    int doy = day;
+    for (int i = 0; i < month - 1; ++i) doy += daysInMonth[i];
+    return doy;
+}
+
 void PrayerTimes::calculateSolarParameters(int dayOfYear, float &eqTime, float &solarDec) {
-    float meanAnomaly = 357.5291 + 0.98560028 * dayOfYear;
-    float meanLongitude = fmod(280.46646 + 0.9856474 * dayOfYear, 360);
-    float eccentricity = 0.016708634 - 0.000042037 * dayOfYear;
-
-    float anomalyRad = deg2rad(meanAnomaly);
-    float equationOfCenter = (1.914602 - 0.004817 * dayOfYear) * sin(anomalyRad)
-                           + (0.019993 - 0.000101 * dayOfYear) * sin(2 * anomalyRad)
-                           + 0.000289 * sin(3 * anomalyRad);
-
-    float trueLongitude = meanLongitude + equationOfCenter;
-    solarDec = asin(sin(deg2rad(trueLongitude)) * sin(deg2rad(23.44)));
-
-    float y = tan(deg2rad(23.44) / 2) * tan(deg2rad(23.44) / 2);
-    eqTime = 4 * (y * sin(2 * deg2rad(meanLongitude))
-                - 2 * eccentricity * sin(anomalyRad)
-                + 4 * eccentricity * y * sin(anomalyRad) * cos(2 * deg2rad(meanLongitude))
-                - 0.5 * y * y * sin(4 * deg2rad(meanLongitude))
-                - 1.25 * eccentricity * eccentricity * sin(2 * anomalyRad));
+    float gamma = 2.0 * PI / 365.0 * (dayOfYear - 1);
+    eqTime = 229.18 * (
+        0.000075 + 0.001868 * cos(gamma) - 0.032077 * sin(gamma)
+        - 0.014615 * cos(2 * gamma) - 0.040849 * sin(2 * gamma));
+    solarDec = 0.006918 - 0.399912 * cos(gamma) + 0.070257 * sin(gamma)
+             - 0.006758 * cos(2 * gamma) + 0.000907 * sin(2 * gamma)
+             - 0.002697 * cos(3 * gamma) + 0.00148 * sin(3 * gamma);
 }
 
-// Calculate solar noon (Dhuhr)
 float PrayerTimes::calculateDhuhr(float eqTime) {
-    return 720 - 4 * (_longitude - (_timeZone * 15)) - eqTime;
+    return 720 - 4 * (_longitude - (_timeZone * 15)) - eqTime + (_dst ? 60 : 0);
 }
 
-// Calculate time for a specific angle (in degrees)
 float PrayerTimes::calculateTimeForAngle(float angle, float Dhuhr, float solarDec, bool isMorning) {
-    float cosHA = (sin(deg2rad(angle)) - sin(deg2rad(_latitude)) * sin(solarDec)) /
-                  (cos(deg2rad(_latitude)) * cos(solarDec));
-    // Clamp cosHA to [-1, 1] to avoid errors.
-    if (cosHA < -1) cosHA = -1;
-    if (cosHA >  1) cosHA =  1;
-    float ha = acos(cosHA); // Hour angle in radians
-    return isMorning ? Dhuhr - 4 * rad2deg(ha) : Dhuhr + 4 * rad2deg(ha);
+    float ha = acos((sin(deg2rad(angle)) - sin(deg2rad(_latitude)) * sin(solarDec)) /
+                    (cos(deg2rad(_latitude)) * cos(solarDec)));
+    float delta = rad2deg(ha) * 4;
+    return isMorning ? Dhuhr - delta : Dhuhr + delta;
 }
 
-// Convert minutes (since midnight) to hours and minutes.
 void PrayerTimes::convertToHoursMinutes(float time, int &hours, int &minutes) {
     hours = floor(time / 60);
     minutes = round(time - (hours * 60));
 }
 
-// Calculate the day of the year.
-int PrayerTimes::calculateDayOfYear(int day, int month, int year) {
-    int daysInMonth[] = {31,28,31,30,31,30,31,31,30,31,30,31};
-    // Handle leap year.
-    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0))
-        daysInMonth[1] = 29;
-    int dayOfYear = 0;
-    for (int i = 0; i < month - 1; i++) {
-        dayOfYear += daysInMonth[i];
-    }
-    dayOfYear += day;
-    return dayOfYear;
+String PrayerTimes::formatTime(int hour, int minute) {
+    int h = hour % 12;
+    if (h == 0) h = 12;
+    String period = (hour < 12) ? "AM" : "PM";
+    char buf[10];
+    sprintf(buf, "%d:%02d %s", h, minute, period.c_str());
+    return String(buf);
 }
 
-// Calculate prayer times for a given date.
+String PrayerTimes::formatTime24WithPeriod(int hour, int minute) {
+    String period = (hour < 12) ? "AM" : "PM";
+
+    char buf[10];
+    sprintf(buf, "%02d:%02d %s", hour, minute, period.c_str());
+
+    return String(buf);
+}
+
 void PrayerTimes::calculate(int day, int month, int year,
-                   int &fajrHour, int &fajrMinute,
-                   int &sunriseHour, int &sunriseMinute,
-                   int &dhuhrHour, int &dhuhrMinute,
-                   int &asrHour, int &asrMinute,
-                   int &maghribHour, int &maghribMinute,
-                   int &ishaHour, int &ishaMinute) 
-{
+    int &fajrHour, int &fajrMinute,
+    int &sunriseHour, int &sunriseMinute,
+    int &dhuhrHour, int &dhuhrMinute,
+    int &asrHour, int &asrMinute,
+    int &maghribHour, int &maghribMinute,
+    int &ishaHour, int &ishaMinute) {
+
     int dayOfYear = calculateDayOfYear(day, month, year);
-    
     float eqTime, solarDec;
     calculateSolarParameters(dayOfYear, eqTime, solarDec);
-    
-    // Dhuhr calculation with adjustment.
-    float Dhuhr = calculateDhuhr(eqTime);
-    Dhuhr += _adjDhuhr;
+
+    float Dhuhr = calculateDhuhr(eqTime) + _adjDhuhr;
     convertToHoursMinutes(Dhuhr, dhuhrHour, dhuhrMinute);
-    
-    // Fajr: calculate using the configured Fajr angle.
-    float fajrTime = calculateTimeForAngle(-_fajrAngle, Dhuhr, solarDec, true);
-    fajrTime += _adjFajr;
-    convertToHoursMinutes(fajrTime, fajrHour, fajrMinute);
-    
-    // Sunrise: using a standard -0.833°.
-    float sunriseTime = calculateTimeForAngle(-0.833, Dhuhr, solarDec, true);
-    sunriseTime += _adjSunrise;
-    convertToHoursMinutes(sunriseTime, sunriseHour, sunriseMinute);
-    
-    // Maghrib (sunset): using -0.833°.
-    float maghribTime = calculateTimeForAngle(-0.833, Dhuhr, solarDec, false);
-    maghribTime += _adjMaghrib;
-    convertToHoursMinutes(maghribTime, maghribHour, maghribMinute);
-    
-    // Isha: either calculated by angle or set as an interval after Maghrib.
-    float ishaTime = 0;
-    if (_ishaIsInterval) {
-      // For methods like Umm al-Qura.
-      ishaTime = maghribTime + _ishaInterval;
-    } else {
-      ishaTime = calculateTimeForAngle(-_ishaAngle, Dhuhr, solarDec, false);
-    }
-    ishaTime += _adjIsha;
-    convertToHoursMinutes(ishaTime, ishaHour, ishaMinute);
-    
-    // Asr: Using the configured shadow factor.
-    float A = atan(1.0 / (_asrFactor + tan(fabs(deg2rad(_latitude) - solarDec))));
-    float cosHA_asr = (sin(A) - sin(deg2rad(_latitude)) * sin(solarDec)) /
-                      (cos(deg2rad(_latitude)) * cos(solarDec));
-    if (cosHA_asr < -1) cosHA_asr = -1;
-    if (cosHA_asr >  1) cosHA_asr =  1;
-    float ha_asr = acos(cosHA_asr);
-    float asrTime = Dhuhr + 4 * rad2deg(ha_asr);
-    asrTime += _adjAsr;
-    convertToHoursMinutes(asrTime, asrHour, asrMinute);
+
+    float fajr = calculateTimeForAngle(-_fajrAngle, Dhuhr, solarDec, true) + _adjFajr;
+    convertToHoursMinutes(fajr, fajrHour, fajrMinute);
+
+    float sunrise = calculateTimeForAngle(-0.833, Dhuhr, solarDec, true) + _adjSunrise;
+    convertToHoursMinutes(sunrise, sunriseHour, sunriseMinute);
+
+    float maghrib = calculateTimeForAngle(-0.833, Dhuhr, solarDec, false) + _adjMaghrib;
+    convertToHoursMinutes(maghrib, maghribHour, maghribMinute);
+
+    float isha = _ishaIsInterval ? maghrib + _ishaInterval : calculateTimeForAngle(-_ishaAngle, Dhuhr, solarDec, false);
+    isha += _adjIsha;
+    convertToHoursMinutes(isha, ishaHour, ishaMinute);
+
+    float angle = rad2deg(atan(1.0 / (_asrFactor + tan(fabs(deg2rad(_latitude) - solarDec)))));
+    float haAsr = acos((sin(deg2rad(angle)) - sin(deg2rad(_latitude)) * sin(solarDec)) /
+                       (cos(deg2rad(_latitude)) * cos(solarDec)));
+    float asr = Dhuhr + rad2deg(haAsr) * 4 + _adjAsr;
+    convertToHoursMinutes(asr, asrHour, asrMinute);
 }
