@@ -21,9 +21,13 @@ PrayerTimes::PrayerTimes(float latitude, float longitude, int timezoneOffsetMinu
       _adjAsr(0), _adjMaghrib(0), _adjIsha(0),
       _fajrAngle(18.0), _ishaAngle(17.0), 
       _asrMethod(SHAFII), _highLatRule(NONE),
-      _ishaIsInterval(false), _ishaMinutes(0)
+      _ishaIsInterval(false), _ishaMinutes(0),
+      _initialized(false)
 {
-    // Default to Muslim World League
+    // Validate input coordinates
+    if (latitude >= -90.0 && latitude <= 90.0 && longitude >= -180.0 && longitude <= 180.0) {
+        _initialized = true;
+    }
 }
 
 void PrayerTimes::setCalculationMethod(const CalculationConfig& config) {
@@ -92,6 +96,22 @@ int PrayerTimes::calculateDayOfYear(int day, int month, int year) {
     }
     
     return dayOfYear;
+}
+
+bool PrayerTimes::validateInputs(int day, int month, int year) {
+    // Check date validity
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+    if (year < 1900 || year > 2100) return false;
+    
+    // More precise day validation
+    int daysInMonth[] = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
+    if ((year % 4 == 0 && year % 100 != 0) || (year % 400 == 0)) {
+        daysInMonth[1] = 29;
+    }
+    
+    if (day > daysInMonth[month - 1]) return false;
+    return true;
 }
 
 void PrayerTimes::calculateSolarParameters(int dayOfYear, float &eqTime, float &solarDec) {
@@ -193,6 +213,23 @@ PrayerTimesResult PrayerTimes::calculate(int day, int month, int year) {
 PrayerTimesResult PrayerTimes::calculateWithOffset(int day, int month, int year, int dstMinutes) {
     PrayerTimesResult result;
     
+    // Validate initialization and inputs
+    if (!_initialized) {
+        result.errorMessage = "Invalid coordinates";
+        return result;
+    }
+    
+    if (!validateInputs(day, month, year)) {
+        result.errorMessage = "Invalid date";
+        return result;
+    }
+    
+    // Warn if high latitude without adjustment rule (calculation may be unrealistic)
+    if (isHighLatitude() && _highLatRule == NONE) {
+        // Note: We don't fail the calculation, but the times may be unreliable
+        // especially during polar day/night periods. User should check high-latitude adjustment.
+    }
+    
     int dayOfYear = calculateDayOfYear(day, month, year);
     
     float eqTime, solarDec;
@@ -227,6 +264,7 @@ PrayerTimesResult PrayerTimes::calculateWithOffset(int day, int month, int year,
     result.isha = normalizeTime(result.isha + _adjIsha + dstMinutes);
     
     result.valid = true;
+    result.errorMessage = nullptr;
     return result;
 }
 

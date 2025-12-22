@@ -80,19 +80,33 @@ struct PrayerTimesResult {
     float asr;
     float maghrib;
     float isha;
-    bool valid;  // False if calculation failed (e.g., extreme latitude)
+    bool valid;  // False if calculation failed (e.g., extreme latitude, invalid input)
+    const char* errorMessage;  // Diagnostic message if valid=false
     
-    PrayerTimesResult() : fajr(0), sunrise(0), dhuhr(0), asr(0), maghrib(0), isha(0), valid(false) {}
+    PrayerTimesResult() : fajr(0), sunrise(0), dhuhr(0), asr(0), maghrib(0), isha(0), 
+                          valid(false), errorMessage(nullptr) {}
 };
 
 class PrayerTimes {
 public:
     // Constructor: latitude, longitude, timezone offset in MINUTES
+    // Validates inputs: latitude ±90°, longitude ±180°
     // Examples: 
     //   Montreal (UTC-5): timezoneOffsetMinutes = -300
     //   India (UTC+5:30): timezoneOffsetMinutes = 330
     //   Nepal (UTC+5:45): timezoneOffsetMinutes = 345
+    // Note: Always check isInitialized() before using the object
     PrayerTimes(float latitude, float longitude, int timezoneOffsetMinutes);
+    
+    // Returns true if coordinates were valid during construction
+    bool isInitialized() const { return _initialized; }
+    
+    // Check if location is at high latitude where special handling is needed
+    // High latitudes (>66.5° or <-66.5°) require adjustment rules for accurate times
+    float getLatitude() const { return _latitude; }
+    
+    // Convenience check: true if latitude is extreme (beyond Arctic/Antarctic circles)
+    bool isHighLatitude() const { return fabs(_latitude) > 66.5; }
 
     // Set calculation method using pre-configured settings
     void setCalculationMethod(const CalculationConfig& config);
@@ -136,6 +150,7 @@ private:
     float _latitude;
     float _longitude;
     int _timezoneOffsetMinutes;
+    bool _initialized;  // Whether coordinates are valid
     
     // Calculation parameters
     float _fajrAngle;
@@ -164,6 +179,7 @@ private:
     // Utility
     float clamp(float value, float minVal, float maxVal);
     float normalizeTime(float time);
+    bool validateInputs(int day, int month, int year);
 };
 
 #endif

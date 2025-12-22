@@ -39,6 +39,12 @@ void printCity(
   int tzMinutes
 ) {
   PrayerTimes pt(lat, lon, tzMinutes);
+  
+  // For high latitude locations, use adjustment
+  if (pt.isHighLatitude()) {
+    pt.setHighLatitudeRule(MIDDLE_OF_NIGHT);
+  }
+  
   pt.setCalculationMethod(CalculationMethods::ISNA);
   pt.setAdjustments(0, 0, 0, 0, 0, 0);
 
@@ -57,13 +63,23 @@ void printCity(
   );
 
   Serial.println();
-  Serial.print("=== "); Serial.print(label); Serial.println(" ===");
+  Serial.print("=== "); Serial.print(label);
+  if (pt.isHighLatitude()) {
+    Serial.print(" (High Latitude: ");
+    Serial.print(lat, 1);
+    Serial.print("°)");
+  }
+  Serial.println(" ===");
   Serial.print("Fajr:    "); Serial.println(pt.formatTime12(fajrH, fajrM));
   Serial.print("Sunrise: "); Serial.println(pt.formatTime12(sunriseH, sunriseM));
   Serial.print("Dhuhr:   "); Serial.println(pt.formatTime12(dhuhrH, dhuhrM));
   Serial.print("Asr:     "); Serial.println(pt.formatTime12(asrH, asrM));
   Serial.print("Maghrib: "); Serial.println(pt.formatTime12(maghribH, maghribM));
   Serial.print("Isha:    "); Serial.println(pt.formatTime12(ishaH, ishaM));
+  
+  if (pt.isHighLatitude()) {
+    Serial.println("* High latitude adjustments applied");
+  }
 }
 
 void setup() {
@@ -112,6 +128,15 @@ void setup() {
     "Oslo, Norway",
     59.9139,
     10.7522,
+    60
+  );
+
+  // Tromsø, Norway (UTC+1, polar region - 69.6°N)
+  // This is in the Arctic Circle where special handling is needed
+  printCity(
+    "Tromsø, Norway (POLAR REGION)",
+    69.6500,
+    18.9553,
     60
   );
 
