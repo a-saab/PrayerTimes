@@ -6,7 +6,11 @@
 # Datatypes (KEYWORD1)
 #######################################
 
-PrayerTimes	KEYWORD1	PrayerTimes
+PrayerTimes	KEYWORD1
+PrayerTimesResult	KEYWORD1
+CalculationConfig	KEYWORD1
+AsrMethod	KEYWORD1
+HighLatitudeRule	KEYWORD1	PrayerTimes
 
 #######################################
 # Methods and Functions (KEYWORD2)
@@ -14,8 +18,17 @@ PrayerTimes	KEYWORD1	PrayerTimes
 
 setAdjustments	KEYWORD2
 setCalculationMethod	KEYWORD2
+setCustomMethod	KEYWORD2
+setAsrMethod	KEYWORD2
+setHighLatitudeRule	KEYWORD2
 calculate	KEYWORD2
-formatTime	KEYWORD2
+calculateWithOffset	KEYWORD2
+formatTime12	KEYWORD2
+formatTime24	KEYWORD2
+minutesToTime	KEYWORD2
+isInitialized	KEYWORD2
+isHighLatitude	KEYWORD2
+getLatitude	KEYWORD2
 
 #######################################
 # Constants (LITERAL1)
@@ -28,3 +41,9 @@ Egyptian	LITERAL1
 Karachi	LITERAL1
 Tehran	LITERAL1
 Jafari	LITERAL1
+SHAFII	LITERAL1
+HANAFI	LITERAL1
+NONE	LITERAL1
+MIDDLE_OF_NIGHT	LITERAL1
+ONE_SEVENTH	LITERAL1
+ANGLE_BASED	LITERAL1
