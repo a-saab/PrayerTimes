@@ -26,12 +26,22 @@
  * - Duha: Sun elevation angle above horizon (default 4.5°, range 4°-6°)
  *   Based on Malaysian JAKIM (4.7°), Indonesian (3.5°), and general astronomy
  *   "Spear's height" ~4°15' corresponds to ~16-20 minutes after sunrise
+ * - Dahwa e Kubra: Midpoint between Fajr and Maghrib
  */
 
 #ifndef PRAYERTIMES_H
 #define PRAYERTIMES_H
 
+#ifdef ARDUINO
 #include <Arduino.h>
+#else
+#include <cmath>
+#include <cstdio>
+#include <string>
+using String = std::string;
+using std::fabs;
+using std::round;
+#endif
 
 // Asr calculation methods
 enum AsrMethod {
@@ -95,11 +105,12 @@ struct PrayerTimesResult {
     float isha;
     float imsak;  // Time to start fasting (before Fajr)
     float duha;   // Forenoon prayer time (after sunrise)
+    float dahwaEKubra; // Midpoint between Fajr and Maghrib (used by some Hanafis)
     bool valid;   // False if calculation failed (e.g., extreme latitude, invalid input)
     const char* errorMessage;  // Diagnostic message if valid=false
     
     PrayerTimesResult() : fajr(0), sunrise(0), dhuhr(0), asr(0), maghrib(0), isha(0), 
-                          imsak(0), duha(0),
+                          imsak(0), duha(0), dahwaEKubra(0),
                           valid(false), errorMessage(nullptr) {}
 };
 
@@ -137,7 +148,7 @@ public:
     void setHighLatitudeRule(HighLatitudeRule rule);
     
     // Set manual adjustments (in minutes) for fine-tuning
-    void setAdjustments(int adjFajr, int adjSunrise, int adjDhuhr, int adjAsr, int adjMaghrib, int adjIsha);
+    void setAdjustments(int adjFajr, int adjSunrise, int adjDhuhr, int adjAsr, int adjMaghrib, int adjIsha, int adjDahwaEKubra = 0);
     
     // Set Imsak offset (minutes before Fajr, default: 10)
     // This represents the precautionary buffer (Temkin) used by many authorities
@@ -158,7 +169,7 @@ public:
     PrayerTimesResult calculateWithOffset(int day, int month, int year, int dstMinutes);
     
     // Legacy API compatibility (v1.x interface)
-    // New: Optional imsak and duha parameters added at the end for backward compatibility
+    // New: Optional imsak, duha and dahwaEKubra parameters added at the end for backward compatibility
     void calculate(int day, int month, int year,
                    int &fajrHour, int &fajrMinute,
                    int &sunriseHour, int &sunriseMinute,
@@ -167,7 +178,8 @@ public:
                    int &maghribHour, int &maghribMinute,
                    int &ishaHour, int &ishaMinute,
                    int *imsakHour = nullptr, int *imsakMinute = nullptr,
-                   int *duhaHour = nullptr, int *duhaMinute = nullptr);
+                   int *duhaHour = nullptr, int *duhaMinute = nullptr,
+                   int *dahwaEKubraHour = nullptr, int *dahwaEKubraMinute = nullptr);
     
     // Utility functions for time formatting
     static String formatTime12(int hour, int minute);
@@ -190,7 +202,7 @@ private:
     HighLatitudeRule _highLatRule;
     
     // Manual adjustments
-    int _adjFajr, _adjSunrise, _adjDhuhr, _adjAsr, _adjMaghrib, _adjIsha;
+    int _adjFajr, _adjSunrise, _adjDahwaEKubra, _adjDhuhr, _adjAsr, _adjMaghrib, _adjIsha;
     
     // Imsak and Duha calculation parameters
     int _imsakOffsetMinutes;   // Minutes before Fajr (default: 10)
