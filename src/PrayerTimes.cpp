@@ -25,14 +25,14 @@ PrayerTimes::PrayerTimes(float latitude, float longitude, int timezoneOffsetMinu
     : _latitude(latitude), 
       _longitude(longitude), 
       _timezoneOffsetMinutes(timezoneOffsetMinutes),
-      _adjFajr(0), _adjSunrise(0), _adjDhuhr(0), 
-      _adjAsr(0), _adjMaghrib(0), _adjIsha(0),
+      _initialized(false),
       _fajrAngle(18.0), _ishaAngle(17.0), 
-      _asrMethod(SHAFII), _highLatRule(NONE),
       _ishaIsInterval(false), _ishaMinutes(0),
+      _asrMethod(SHAFII), _highLatRule(NONE),
+      _adjFajr(0), _adjSunrise(0), _adjDhuhr(0),
+      _adjAsr(0), _adjMaghrib(0), _adjIsha(0),
       _imsakOffsetMinutes(10),  // Default: 10 minutes before Fajr
-      _duhaAngle(4.5),           // Default: 4.5° above horizon for Duha
-      _initialized(false)
+      _duhaAngle(4.5)           // Default: 4.5° above horizon for Duha
 {
     // Validate input coordinates
     if (latitude >= -90.0 && latitude <= 90.0 && longitude >= -180.0 && longitude <= 180.0) {
@@ -203,6 +203,8 @@ float PrayerTimes::nightFraction(float angle) {
 }
 
 void PrayerTimes::applyHighLatitudeAdjustments(PrayerTimesResult &times, float solarDec) {
+    (void) solarDec; // Silence unused-parameter warning
+
     if (_highLatRule == NONE) return;
     
     float nightLength = times.sunrise - times.maghrib;

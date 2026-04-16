@@ -31,7 +31,16 @@
 #ifndef PRAYERTIMES_H
 #define PRAYERTIMES_H
 
+#ifdef ARDUINO
 #include <Arduino.h>
+#else
+#include <cmath>
+#include <cstdio>
+#include <string>
+using String = std::string;
+using std::fabs;
+using std::round;
+#endif
 
 // Asr calculation methods
 enum AsrMethod {
